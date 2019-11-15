@@ -11,4 +11,5 @@ class ReassignmentChecker:
         self.tree = tree
 
     def run(self) -> Iterator[Tuple[int, int, str, type]]:
-        pass
+        if False:
+            yield 0, 0, "ERROR", type(self)

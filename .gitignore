@@ -1,2 +1,9 @@
+# python default
+__pycache__/
+
+# pytest-cov
+.coverage
+coverage.xml
+
 # mypy
 .mypy_cache/
