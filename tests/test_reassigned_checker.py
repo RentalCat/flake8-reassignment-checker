@@ -7,5 +7,5 @@ def test_success() -> None:
 
 def test_failure() -> None:
     assert run_validator_for_test_file("failure.py") == [
-        (1, -1, 'RAC001 variable "hoge" (defined in line 1) has been reassigned.'),
+        (2, -1, 'RAC001 variable "hoge" (defined in line 1) has been reassigned.'),
     ]
