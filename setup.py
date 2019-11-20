@@ -42,9 +42,7 @@ setup(
     author="RentalCat",
     author_email="RentalCat@users.noreply.github.com",
     install_requires=["setuptools"],
-    entry_points={
-        "flake8.extension": [f"RAC = {package_name}.checker:ReassignmentChecker"],
-    },
+    entry_points={"flake8.extension": [f"RAC = {package_name}.checker:ReassignmentChecker"]},
     url="https://github.com/RentalCat/flake8-reassignment-checker",
     license="MIT",
     py_modules=[package_name],

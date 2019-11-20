@@ -23,9 +23,7 @@ class ReassignmentChecker:
         self.tree = tree
 
     def run(self) -> Iterator[Tuple[int, int, str, type]]:
-        for o in self._check_names(
-            self._analysis_valiables(ast.iter_child_nodes(self.tree))
-        ):
+        for o in self._check_names(self._analysis_valiables(ast.iter_child_nodes(self.tree))):
             yield o.lineno, o.col_offset, o.msg, type(self)
 
     @classmethod
@@ -36,11 +34,9 @@ class ReassignmentChecker:
 
         if isinstance(child, ast.Assign):
             for target in child.targets:
-                yield _Valiable(
-                    name=cls._get_assign_name(target),
-                    lineno=child.lineno,
-                    type_="variable",
-                )
+                yield _Valiable(cls._get_assign_name(target), child.lineno, "variable")
+        elif isinstance(child, ast.AnnAssign):
+            yield _Valiable(cls._get_assign_name(child.target), child.lineno, "variable")
 
         yield from cls._analysis_valiables(childs)
 
