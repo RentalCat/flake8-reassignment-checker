@@ -1,5 +1,6 @@
 from typing import Optional
-from setuptools import setup, find_packages  # type: ignore
+
+from setuptools import find_packages, setup  # type: ignore
 
 package_name = "flake8_reassignment_checker"
 
