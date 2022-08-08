@@ -37,7 +37,7 @@ jobs:
       - name: Install dependencies
         run: |
           pip install --upgrade pip
-          pip install black mypy pytest 'flake8==${{matrix.flake8-version}}'
+          pip install black mypy pytest xenon 'flake8==${{matrix.flake8-version}}'
       - name: execute flake8
         run: flake8 .
       - name: execute black
@@ -46,3 +46,5 @@ jobs:
         run: mypy --strict .
       - name: execute pytest
         run: pytest
+      - name: execute Xenon
+        run: xenon -max-absolute B --max-modules A --max-average A
