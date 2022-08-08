@@ -7,33 +7,42 @@ on:
   pull_request:
     branches:
       - '*'
+
 jobs:
-  build:
+  test:
     runs-on: ubuntu-latest
+    name: python:${{matrix.python-version}}, flake8:${{matrix.flake8-version}}
+    strategy:
+      fail-fast: true
+      matrix:
+        python-version:
+          - '3.7'
+          - '3.8'
+          - '3.9'
+          - '3.10'
+        flake8-version:
+          - '3.9.2'
+          - '4.0.1'
+          - '5.0.4'
+    env:
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     steps:
       - uses: actions/checkout@v2
-
-      - name: Set up Python 3.7
-        uses: actions/setup-python@v2
+      - uses: actions/setup-python@v2
         with:
-          python-version: 3.7.13
-
+          python-version: ${{matrix.python-version}}
+          architecture: x64
       - name: set pythonpath
         run: echo "PYTHONPATH=${PYTHONPATH}:$(pwd)" >> $GITHUB_ENV
-
       - name: Install dependencies
         run: |
           pip install --upgrade pip
-          pip install black flake8 mypy pytest
-
+          pip install black mypy pytest 'flake8==${{matrix.flake8-version}}'
       - name: execute flake8
         run: flake8 .
-
       - name: execute black
         run: black --check --diff --fast .
-
       - name: execute mypy
         run: mypy --strict .
-
       - name: execute pytest
         run: pytest
