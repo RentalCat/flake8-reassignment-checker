@@ -1,21 +1,14 @@
-import ast
+from __future__ import annotations
+
+# import ast
 import os
-from typing import List, Tuple
 
-from flake8_reassignment_checker.checker import ReassignmentChecker
+# from flake8_reassignment_checker.checker import ReassignmentChecker
 
+TEST_FILES_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "test_files")
 
-def run_validator_for_test_file(
-    filename: str,
-) -> List[Tuple[int, int, str, type]]:
-    test_file_path = os.path.join(
-        os.path.dirname(os.path.abspath(__file__)),
-        "test_files",
-        filename,
-    )
-    with open(test_file_path, "r") as file_handler:
-        raw_content = file_handler.read()
-    tree = ast.parse(raw_content)
-    checker = ReassignmentChecker(tree=tree, filename=filename)
-
-    return list(checker.run())
+# def run_validator_for_test_file(filename: str) -> list[tuple[int, int, str, type]]:
+#     with open(os.path.join(os.path.dirname(TEST_FILES_DIR, filename))) as f:
+#         return list(
+#             ReassignmentChecker(tree=ast.parse(f.read()), filename=filename).run()
+#         )

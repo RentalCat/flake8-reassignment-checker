@@ -10,12 +10,22 @@ jobs:
     steps:
       - uses: actions/checkout@v2
 
+      - name: Set up Python 3.7
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.7.13
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install pytest
+
       - name: Python Code Quality and Lint
         uses: ricardochaves/python-lint@v1.4.0
         with:
           python-root-list: .
           use-pylint: false
-          use-pycodestyle: false
+          use-pycodestyle: true
           use-flake8: true
           use-black: true
           extra-black-options: "--diff --fast"
@@ -27,9 +37,4 @@ jobs:
       #   uses: actions/setup-python@v2
       #   with:
       #     python-version: 3.6.15
-      #
-      # - name: Install dependencies
-      #   run: |
-      #     python -m pip install --upgrade pip
-      #     pip install flake8 pytest pytest-cov
-      #     if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+      #    extra-mypy-options: "--strict"

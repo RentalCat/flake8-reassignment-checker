@@ -1,5 +1,7 @@
+from __future__ import annotations
+
 import ast
-from typing import Iterator, Tuple
+import typing as t
 
 from . import __version__ as version
 
@@ -8,9 +10,9 @@ class ReassignmentChecker:
     name = "reassignment-checker"
     version = version
 
-    def __init__(self, tree: ast.Module, filename: str) -> None:
+    def __init__(self, tree: ast.Module, filepath: str, lines: str) -> None:
         self.tree = tree
 
-    def run(self) -> Iterator[Tuple[int, int, str, type]]:
+    def run(self) -> t.Iterator[tuple[int, int, str, type]]:
         if False:
             yield 0, 0, "ERROR", type(self)
