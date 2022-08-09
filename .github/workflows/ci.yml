@@ -37,7 +37,7 @@ jobs:
       - name: Install dependencies
         run: |
           pip install --upgrade pip
-          pip install black mypy pytest xenon 'flake8==${{matrix.flake8-version}}'
+          pip install black mypy pytest xenon 'flake8==${{matrix.flake8-version}}' pytest-cov
       - name: execute flake8
         run: flake8 .
       - name: execute black
@@ -45,6 +45,12 @@ jobs:
       - name: execute mypy
         run: mypy --strict .
       - name: execute pytest
-        run: pytest
+        run: pytest --cov=flake8_reassignment_checker --cov-report=xml
       - name: execute Xenon
         run: xenon -max-absolute B --max-modules A --max-average A
+      - name: send test coverage to code climate
+        uses: paambaati/codeclimate-action@v3.0.0
+        env:
+          CC_TEST_REPORTER_ID: ${{ secrets.CODE_CLIMATE_REPORTER_ID }}
+        with:
+          debug: true
