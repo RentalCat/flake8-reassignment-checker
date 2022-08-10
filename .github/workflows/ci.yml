@@ -11,46 +11,23 @@ on:
 jobs:
   test:
     runs-on: ubuntu-latest
-    name: python:${{matrix.python-version}}, flake8:${{matrix.flake8-version}}
+    name: python:${{matrix.python_version}}, flake8:${{matrix.flake8_version}}
     strategy:
       fail-fast: true
       matrix:
-        python-version:
+        python_version:
           - '3.7'
           - '3.8'
           - '3.9'
           - '3.10'
-        flake8-version:
+        flake8_version:
           - '3.9.2'
           - '4.0.1'
           - '5.0.4'
     env:
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     steps:
-      - uses: actions/checkout@v2
-      - uses: actions/setup-python@v2
+      - uses: ./.github/workflows/test.yml
         with:
-          python-version: ${{matrix.python-version}}
-          architecture: x64
-      - name: set pythonpath
-        run: echo "PYTHONPATH=${PYTHONPATH}:$(pwd)" >> $GITHUB_ENV
-      - name: Install dependencies
-        run: |
-          pip install --upgrade pip
-          pip install black mypy pytest xenon 'flake8==${{matrix.flake8-version}}' pytest-cov
-      - name: execute flake8
-        run: flake8 .
-      - name: execute black
-        run: black --check --diff --fast .
-      - name: execute mypy
-        run: mypy --strict .
-      - name: execute pytest
-        run: pytest --cov=flake8_reassignment_checker --cov-report=xml
-      - name: send test coverage to code climate
-        uses: paambaati/codeclimate-action@v3.0.0
-        env:
-          CC_TEST_REPORTER_ID: ${{ secrets.CODE_CLIMATE_REPORTER_ID }}
-        with:
-          debug: true
-      - name: execute Xenon
-        run: xenon -max-absolute A --max-modules A --max-average A
+          python_version: ${{ matrix.python_version }}
+          flake8_version: ${{ matrix.flake8_version }}

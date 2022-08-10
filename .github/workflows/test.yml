@@ -1,0 +1,50 @@
+name: test
+
+on:
+  workflow_call:
+    inputs:
+      python_version:
+        type: string
+      flake8_version:
+        type: string
+
+jobs:
+  single-test:
+    name: python:${{ github.event.inputs.python_version }}, flake8:${{ github.event.inputs.flake8_version }}
+    runs-on: ubuntu-latest
+    env:
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    steps:
+      - name: check params
+        run: |
+          if [ ! "${{ github.event.inputs.python_version }}" ] || [ ! "${{ github.event.inputs.flake8_version }}" ]; then
+            exit 1
+          fi
+      - uses: actions/checkout@v2
+      - uses: actions/setup-python@v2
+        with:
+          python-version: ${{ github.event.inputs.python_version }}
+          architecture: x64
+      - name: set pythonpath
+        run: echo "PYTHONPATH=${PYTHONPATH}:$(pwd)" >> $GITHUB_ENV
+      - name: Install dependencies
+        run: |
+          pip install --upgrade pip
+          pip install black mypy pytest xenon 'flake8==${{ github.event.inputs.flake8_version }}' pytest-cov
+      - name: execute flake8
+        run: flake8 .
+      - name: execute black
+        run: black --check --diff --fast .
+      - name: execute mypy
+        run: mypy --strict .
+      - name: execute Xenon
+        run: xenon -max-absolute A --max-modules A --max-average A
+      - name: execute pytest
+        run: pytest --cov=flake8_reassignment_checker --cov-report=xml
+      - name: send test coverage to code climate
+        if: ${{ !env.ACT }}
+        uses: paambaati/codeclimate-action@v3.0.0
+        env:
+          CC_TEST_REPORTER_ID: ${{ secrets.CODE_CLIMATE_REPORTER_ID }}
+        with:
+          debug: true
