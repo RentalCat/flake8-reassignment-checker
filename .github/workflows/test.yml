@@ -1,8 +1,8 @@
 name: test
 
 on:
-  # workflow_call:
-  workflow_dispatch:
+  # workflow_dispatch:
+  workflow_call:
     inputs:
       python_version:
         type: string
@@ -16,12 +16,12 @@ jobs:
     env:
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     steps:
+      - uses: actions/checkout@v2
       - name: check params
         run: |
           if [ ! "${{ github.event.inputs.python_version }}" ] || [ ! "${{ github.event.inputs.flake8_version }}" ]; then
             exit 1
           fi
-      - uses: actions/checkout@v2
       - uses: actions/setup-python@v2
         with:
           python-version: ${{ github.event.inputs.python_version }}
