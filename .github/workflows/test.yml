@@ -16,7 +16,7 @@ jobs:
     env:
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - name: check params
         run: |
           if [ ! "${{ github.event.inputs.python_version }}" ] || [ ! "${{ github.event.inputs.flake8_version }}" ]; then
