@@ -1,7 +1,8 @@
 name: test
 
 on:
-  workflow_call:
+  # workflow_call:
+  workflow_dispatch:
     inputs:
       python_version:
         type: string
