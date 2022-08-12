@@ -12,6 +12,12 @@ from flake8_reassignment_checker.checker import ReassignmentChecker
 
 TEST_FILES_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "test_files")
 
+# def test_failure() -> None:
+#     assert run_validator_for_test_file("failure.py") == [
+#         (2, -1, 'RAC001 variable "hoge" (defined in line 1) has been reassigned.'),
+#         (3, -1, 'RAC001 variable "hoge" (defined in line 1) has been reassigned.'),
+#     ]
+
 
 def _load_error_cases(lines: str) -> t.Iterator[str]:
     for line in dropwhile(lambda x: not re.match("ERRORS:", x), lines.split("\n")):
