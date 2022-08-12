@@ -1,0 +1,85 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - 'master'
+  pull_request:
+    branches:
+      - '*'
+
+jobs:
+  prepare:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - id: get-versions
+        run: |
+          version_list="$(cat setup.py | grep -e '^PYTHON_VERSION' | sed -e 's/PYTHON_VERSIONS = //')"
+          versions=($(echo $version_list | sed -e 's/\[\(.*\)\]/\1/' | tr -d ',"'))
+          latest_version="$(printf "%s\n" "${versions[@]}" | sort -V | tail -n1)"
+          echo "::set-output name=version_matrix::$version_list"
+          echo "::set-output name=latest_version::$latest_version"
+    outputs:
+      version_matrix: ${{ steps.get-versions.outputs.version_matrix }}
+      latest_version: ${{ steps.get-versions.outputs.latest_version }}
+  lints:
+    runs-on: ubuntu-latest
+    name: lints/python:${{ needs.prepare.outputs.latest_version }}
+    needs: prepare
+    env:
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-python@v4
+        with:
+          python-version: ${{ needs.prepare.outputs.latest_version }}
+          check-latest: true
+          architecture: x64
+      - name: Install dependencies
+        run: |
+          pip install --upgrade pip
+          pip install black mypy xenon flake8 pytest
+      - name: execute flake8
+        run: flake8 .
+      - name: execute black
+        run: black --check --diff --fast .
+      - name: execute mypy
+        run: mypy --strict .
+      - name: execute Xenon
+        run: xenon -max-absolute A --max-modules A --max-average A
+  pytest:
+    runs-on: ubuntu-latest
+    name: pytest/python:${{matrix.python_version}}, flake8:${{matrix.flake8_version}}
+    needs: [prepare, lints]
+    strategy:
+      fail-fast: true
+      matrix:
+        python_version: ${{ fromJson(needs.prepare.outputs.version_matrix) }}
+        flake8_version:
+          - '3.9.2'
+          - '4.0.1'
+          - '5.0.4'
+    env:
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-python@v4
+        with:
+          python-version: ${{ matrix.python_version }}
+          architecture: x64
+      - name: set pythonpath
+        run: echo "PYTHONPATH=${PYTHONPATH}:$(pwd)" >> $GITHUB_ENV
+      - name: Install dependencies
+        run: |
+          pip install --upgrade pip
+          pip install pytest pytest-cov 'flake8==${{ matrix.flake8_version }}'
+      - name: execute pytest
+        run: pytest --cov=flake8_reassignment_checker --cov-report=xml
+      - name: send test coverage to code climate
+        if: ${{ !env.ACT }}
+        uses: paambaati/codeclimate-action@v3.0.0
+        env:
+          CC_TEST_REPORTER_ID: ${{ secrets.CODE_CLIMATE_REPORTER_ID }}
+        with:
+          debug: true

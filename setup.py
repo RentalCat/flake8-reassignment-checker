@@ -1,15 +1,20 @@
-from typing import Optional
-from setuptools import setup, find_packages  # type: ignore
+from __future__ import annotations
+import typing as t
+from setuptools import find_packages, setup  # type: ignore
+from packaging import version
 
-package_name = "flake8_reassignment_checker"
+import flake8_reassignment_checker
 
+PACKAGE_NAME = "flake8_reassignment_checker"
+SHORT_DESCRIPTION = "[WIP] Flake8 plugin that checks reassignment values."
+AUTHOR_NAME = "RentalCat"
+AUTHOR_EMAIL = "RentalCat"
+URL = "https://github.com/RentalCat/flake8-reassignment-checker"
+PYTHON_VERSIONS = ["3.7", "3.8", "3.9", "3.10"]
 
-def get_version() -> Optional[str]:
-    with open(f"{package_name}/__init__.py", "r") as f:
-        for line in f.readlines():
-            if line.startswith("__version__"):
-                return line.split("=")[-1].strip().strip('"')
-    return None
+py_versions: list[version.Version] = [
+    t.cast(version.Version, version.parse(v)) for v in PYTHON_VERSIONS
+]
 
 
 def get_long_description() -> str:
@@ -17,34 +22,44 @@ def get_long_description() -> str:
         return f.read()
 
 
+def make_classifiers() -> t.Iterator[str]:
+    yield "Development Status :: 1 - Planning"  # TODO fix to stable
+    yield "Environment :: Console"
+    yield "Framework :: Flake8"
+    yield "Intended Audience :: Developers"
+    yield "License :: OSI Approved :: MIT License"
+    yield "Operating System :: OS Independent"
+    # Programming Language: (python versions)
+    yield "Programming Language :: Python"
+    for py_major in {v.major for v in py_versions}:
+        yield f"Programming Language :: Python :: {py_major}"
+    for py_version in py_versions:
+        yield f"Programming Language :: Python :: {py_version}"
+    # Topic:
+    yield "Topic :: Software Development :: Documentation"
+    yield "Topic :: Software Development :: Libraries :: Python Modules"
+    yield "Topic :: Software Development :: Quality Assurance"
+
+
 setup(
-    name=package_name,
-    description="[WIP] Flake8 plugin that checks reassignment values.",
-    classifiers=[
-        "Environment :: Console",
-        "Framework :: Flake8",
-        "Operating System :: OS Independent",
-        "Topic :: Software Development :: Documentation",
-        "Topic :: Software Development :: Libraries :: Python Modules",
-        "Topic :: Software Development :: Quality Assurance",
-        "Programming Language :: Python",
-        "Programming Language :: Python :: 3.6",
-        "Programming Language :: Python :: 3.7",
-        "Programming Language :: Python :: 3.8",
-    ],
+    name=PACKAGE_NAME,
+    author=AUTHOR_NAME,
+    author_email=AUTHOR_EMAIL,
+    maintainer=AUTHOR_NAME,
+    maintainer_email=AUTHOR_EMAIL,
+    description=SHORT_DESCRIPTION,
+    classifiers=list(make_classifiers()),
     long_description=get_long_description(),
     long_description_content_type="text/markdown",
     packages=find_packages(),
-    python_requires=">=3.6",
+    python_requires=f">={min(py_versions)}",
     include_package_data=True,
     keywords="flake8",
-    version=get_version(),
-    author="RentalCat",
-    author_email="RentalCat@users.noreply.github.com",
-    install_requires=["setuptools"],
-    entry_points={"flake8.extension": [f"RAC = {package_name}.checker:ReassignmentChecker"]},
-    url="https://github.com/RentalCat/flake8-reassignment-checker",
+    version=flake8_reassignment_checker.__version__,
+    install_requires=["setuptools", "flake8"],
+    entry_points={"flake8.extension": [f"RAC = {PACKAGE_NAME}:ReassignmentChecker"]},
+    url=URL,
     license="MIT",
-    py_modules=[package_name],
+    py_modules=[PACKAGE_NAME],
     zip_safe=False,
 )

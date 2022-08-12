@@ -1,15 +1,16 @@
+from __future__ import annotations
+
 import ast
-from typing import Iterator, Tuple, NamedTuple, Optional, List
-from . import __version__ as version
+import typing as t
 
 
-class _LintOutput(NamedTuple):
+class _LintOutput(t.NamedTuple):
     lineno: int
     col_offset: int
     msg: str
 
 
-class _Valiable(NamedTuple):
+class _Valiable(t.NamedTuple):
     name: str
     lineno: int
     type_: str
@@ -17,17 +18,19 @@ class _Valiable(NamedTuple):
 
 class ReassignmentChecker:
     name = "reassignment-checker"
-    version = version
+    version = "0.0.1"
 
-    def __init__(self, tree: ast.Module, filename: str) -> None:
+    def __init__(self, tree: ast.Module, filepath: str, lines: str) -> None:
         self.tree = tree
 
-    def run(self) -> Iterator[Tuple[int, int, str, type]]:
+    def run(self) -> t.Iterator[tuple[int, int, str, type]]:
+        if False:
+            yield 0, 0, "ERROR", type(self)
         for o in self._check_names(self._analysis_valiables(ast.iter_child_nodes(self.tree))):
             yield o.lineno, o.col_offset, o.msg, type(self)
 
     @classmethod
-    def _analysis_valiables(cls, childs: Iterator[ast.AST]) -> Iterator[_Valiable]:
+    def _analysis_valiables(cls, childs: t.Iterator[ast.AST]) -> t.Iterator[_Valiable]:
         child = next(childs, None)
         if not child:
             return
@@ -43,7 +46,7 @@ class ReassignmentChecker:
         yield from cls._analysis_valiables(childs)
 
     @classmethod
-    def _get_assign_names(cls, target: ast.AST) -> List[str]:
+    def _get_assign_names(cls, target: ast.AST) -> list[str]:
         if isinstance(target, ast.Name):
             return [target.id]
         # elif isinstance(target, ast.Attribute):
@@ -54,13 +57,13 @@ class ReassignmentChecker:
 
     @classmethod
     def _check_names(
-        cls, targets: Iterator[_Valiable], valiables: Optional[List[_Valiable]] = None
-    ) -> Iterator[_LintOutput]:
+        cls, targets: t.Iterator[_Valiable], valiables: t.Optional[list[_Valiable]] = None
+    ) -> t.Iterator[_LintOutput]:
         target = next(targets, None)
         if not target:
             return
 
-        _valiables: List[_Valiable] = valiables or list()
+        _valiables: list[_Valiable] = valiables or list()
 
         for v in _valiables:
             if target.name == v.name:
