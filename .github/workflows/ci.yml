@@ -9,40 +9,37 @@ on:
       - '*'
 
 jobs:
-  test:
+  prepare:
     runs-on: ubuntu-latest
-    name: python:${{matrix.python_version}}, flake8:${{matrix.flake8_version}}
-    strategy:
-      fail-fast: true
-      matrix:
-        python_version:
-          - '3.7'
-          - '3.8'
-          - '3.9'
-          - '3.10'
-        flake8_version:
-          - '3.9.2'
-          - '4.0.1'
-          - '5.0.4'
+    steps:
+      - uses: actions/checkout@v3
+      - id: get-versions
+        run: |
+          version_list="$(cat setup.py | grep -e '^PYTHON_VERSION' | sed -e 's/PYTHON_VERSIONS = //')"
+          versions=($(echo $version_list | sed -e 's/\[\(.*\)\]/\1/' | tr -d ',"'))
+          latest-version="$(printf "%s\n" "${versions[@]}" | sort -V | tail -n1)"
+          echo "::set-output name=version_matrix::$version_list"
+          echo "::set-output name=latest-version::$latest-version"
+    outputs:
+      version_matrix: ${{ steps.get-versions.outputs.version_matrix }}
+      latest-version: ${{ steps.get-versions.outputs.latest-version }}
+  lints:
+    runs-on: ubuntu-latest
+    name: lints/python:${{ needs.prepare.outputs.latest-version }}
+    needs: prepare
     env:
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     steps:
       - uses: actions/checkout@v3
-      - name: check params
-        run: |
-          if [ ! "${{ matrix.python_version }}" ] || [ ! "${{ matrix.flake8_version }}" ]; then
-            exit 1
-          fi
-      - uses: actions/setup-python@v2
+      - uses: actions/setup-python@v4
         with:
-          python-version: ${{ matrix.python_version }}
+          python-version: ${{ needs.prepare.outputs.latest-version }}
+          check-latest: true
           architecture: x64
-      - name: set pythonpath
-        run: echo "PYTHONPATH=${PYTHONPATH}:$(pwd)" >> $GITHUB_ENV
       - name: Install dependencies
         run: |
           pip install --upgrade pip
-          pip install black mypy pytest xenon 'flake8==${{ matrix.flake8_version }}' pytest-cov
+          pip install black mypy xenon flake8 pytest
       - name: execute flake8
         run: flake8 .
       - name: execute black
@@ -51,6 +48,32 @@ jobs:
         run: mypy --strict .
       - name: execute Xenon
         run: xenon -max-absolute A --max-modules A --max-average A
+  pytest:
+    runs-on: ubuntu-latest
+    name: pytest/python:${{matrix.python_version}}, flake8:${{matrix.flake8_version}}
+    needs: [prepare, lints]
+    strategy:
+      fail-fast: true
+      matrix:
+        python_version: ${{ fromJson(needs.prepare.outputs.version_matrix) }}
+        flake8_version:
+          - '3.9.2'
+          - '4.0.1'
+          - '5.0.4'
+    env:
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-python@v4
+        with:
+          python-version: ${{ matrix.python_version }}
+          architecture: x64
+      - name: set pythonpath
+        run: echo "PYTHONPATH=${PYTHONPATH}:$(pwd)" >> $GITHUB_ENV
+      - name: Install dependencies
+        run: |
+          pip install --upgrade pip
+          pip install pytest pytest-cov 'flake8==${{ matrix.flake8_version }}'
       - name: execute pytest
         run: pytest --cov=flake8_reassignment_checker --cov-report=xml
       - name: send test coverage to code climate

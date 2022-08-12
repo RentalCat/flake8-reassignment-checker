@@ -10,9 +10,10 @@ SHORT_DESCRIPTION = "[WIP] Flake8 plugin that checks reassignment values."
 AUTHOR_NAME = "RentalCat"
 AUTHOR_EMAIL = "RentalCat"
 URL = "https://github.com/RentalCat/flake8-reassignment-checker"
+PYTHON_VERSIONS = ["3.7", "3.8", "3.9", "3.10"]
 
-PYTHON_VERSIONS: list[version.Version] = [
-    t.cast(version.Version, version.parse(v)) for v in ["3.7", "3.8", "3.9", "3.10"]
+py_versions: list[version.Version] = [
+    t.cast(version.Version, version.parse(v)) for v in PYTHON_VERSIONS
 ]
 
 
@@ -30,9 +31,9 @@ def make_classifiers() -> t.Iterator[str]:
     yield "Operating System :: OS Independent"
     # Programming Language: (python versions)
     yield "Programming Language :: Python"
-    for py_major in {v.major for v in PYTHON_VERSIONS}:
+    for py_major in {v.major for v in py_versions}:
         yield f"Programming Language :: Python :: {py_major}"
-    for py_version in PYTHON_VERSIONS:
+    for py_version in py_versions:
         yield f"Programming Language :: Python :: {py_version}"
     # Topic:
     yield "Topic :: Software Development :: Documentation"
@@ -51,7 +52,7 @@ setup(
     long_description=get_long_description(),
     long_description_content_type="text/markdown",
     packages=find_packages(),
-    python_requires=f">={min(PYTHON_VERSIONS)}",
+    python_requires=f">={min(py_versions)}",
     include_package_data=True,
     keywords="flake8",
     version=flake8_reassignment_checker.__version__,
