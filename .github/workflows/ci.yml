@@ -17,15 +17,15 @@ jobs:
         run: |
           version_list="$(cat setup.py | grep -e '^PYTHON_VERSION' | sed -e 's/PYTHON_VERSIONS = //')"
           versions=($(echo $version_list | sed -e 's/\[\(.*\)\]/\1/' | tr -d ',"'))
-          latest-version="$(printf "%s\n" "${versions[@]}" | sort -V | tail -n1)"
+          latest_version="$(printf "%s\n" "${versions[@]}" | sort -V | tail -n1)"
           echo "::set-output name=version_matrix::$version_list"
-          echo "::set-output name=latest-version::$latest-version"
+          echo "::set-output name=latest_version::$latest_version"
     outputs:
       version_matrix: ${{ steps.get-versions.outputs.version_matrix }}
-      latest-version: ${{ steps.get-versions.outputs.latest-version }}
+      latest_version: ${{ steps.get-versions.outputs.latest_version }}
   lints:
     runs-on: ubuntu-latest
-    name: lints/python:${{ needs.prepare.outputs.latest-version }}
+    name: lints/python:${{ needs.prepare.outputs.latest_version }}
     needs: prepare
     env:
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -33,7 +33,7 @@ jobs:
       - uses: actions/checkout@v3
       - uses: actions/setup-python@v4
         with:
-          python-version: ${{ needs.prepare.outputs.latest-version }}
+          python-version: ${{ needs.prepare.outputs.latest_version }}
           check-latest: true
           architecture: x64
       - name: Install dependencies
