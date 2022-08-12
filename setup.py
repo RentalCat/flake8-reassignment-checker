@@ -1,5 +1,6 @@
+from __future__ import annotations
 import typing as t
-from setuptools import find_packages, setup
+from setuptools import find_packages, setup  # type: ignore
 from packaging import version
 
 import flake8_reassignment_checker
@@ -10,8 +11,8 @@ AUTHOR_NAME = "RentalCat"
 AUTHOR_EMAIL = "RentalCat"
 URL = "https://github.com/RentalCat/flake8-reassignment-checker"
 
-PYTHON_VERSIONS: version.Version = [
-    version.parse(v) for v in ["3.7", "3.8", "3.9", "3.10"]
+PYTHON_VERSIONS: list[version.Version] = [
+    t.cast(version.Version, version.parse(v)) for v in ["3.7", "3.8", "3.9", "3.10"]
 ]
 
 
