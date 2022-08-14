@@ -12,9 +12,7 @@ AUTHOR_EMAIL = "RentalCat"
 URL = "https://github.com/RentalCat/flake8-reassignment-checker"
 PYTHON_VERSIONS = ["3.7", "3.8", "3.9", "3.10"]
 
-py_versions: list[version.Version] = [
-    t.cast(version.Version, version.parse(v)) for v in PYTHON_VERSIONS
-]
+py_versions: list[version.Version] = [t.cast(version.Version, version.parse(v)) for v in PYTHON_VERSIONS]
 
 
 def get_long_description() -> str:
